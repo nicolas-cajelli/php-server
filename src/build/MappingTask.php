@@ -36,6 +36,8 @@ class MappingTask implements BuildTask
             $reader = new \DocBlockReader\Reader(strval($class));
             if ($reader->getParameter('Controller')) {
                 $this->generateControllerMappings($reader, $class, $paths, $dependencies);
+            } elseif ($reader->getParameter('NonSharedService')) {
+                $dependencies->add(strval($class), [], false);
             }
         }
         $this->writePathMapping($paths->simple, $paths->dynamic);
@@ -132,13 +134,16 @@ class MappingTask implements BuildTask
     function writeServicesMapping(DependenciesMap $map) {
         $mapping = "<?php\nuse " . Service::class . ";\n";
         $mapping .= "return [\n";
-        foreach ($map->getServices() as $service => $dependencies) {
+        foreach ($map->getServices() as $service => $config) {
             $serviceName = trim(str_replace('\\', '.', $service), '.');
             $mapping.= "\tService::create('$serviceName', \\$service::class)";
-            if (! empty($dependencies)) {
+            if (! $config['shared']) {
+                $mapping .= "\n\t\t->setShared(false)";
+            }
+            if (! empty($config['dependencies'])) {
                 $mapping .= "\n\t\t->withReferences([";
                 $first = true;
-                foreach ($dependencies as $dependency) {
+                foreach ($config['dependencies'] as $dependency) {
                     if (! $first) {
                         $mapping .= ', ';
                     } else {

@@ -27,6 +27,8 @@ class Service
      */
     private $class;
 
+    protected $shared;
+
     /**
      * Service constructor.
      * @param string $id
@@ -41,6 +43,11 @@ class Service
     public static function create($id, $class) : Service
     {
         return new static($id, $class);
+    }
+
+    public function setShared($flag) {
+        $this->shared = $flag;
+        return $this;
     }
 
     /**
@@ -64,6 +71,9 @@ class Service
         $def = $container->register($this->getId(), $this->getClass());
         foreach ($this->references as $reference) {
             $def->addArgument(new Reference($reference));
+        }
+        if (! $this->shared) {
+            $def->setShared(false);
         }
     }
 

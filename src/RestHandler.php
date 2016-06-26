@@ -16,9 +16,10 @@ use nicolascajelli\server\exception\NotFoundException;
 use nicolascajelli\server\exception\RestException;
 use nicolascajelli\server\response\ErrorResponse;
 use nicolascajelli\server\response\Response;
+use nicolascajelli\server\filesystem\ProjectStructure;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-abstract class RestHandler
+class RestHandler
 {
     /**
      * @var Request
@@ -33,8 +34,10 @@ abstract class RestHandler
     /**
      * Fussball constructor.
      */
-    public function __construct()
+    public function __construct(ContainerBuilder $container, ProjectStructure $structure)
     {
+        $this->structure = $structure;
+        $this->container = $container;
         $this->buildContainer();
         $this->_request = $this->container->get('nicolascajelli.server.request.Request');
         set_exception_handler([$this, 'dispatchError']);
@@ -47,10 +50,9 @@ abstract class RestHandler
         } else {
             $errorCode = HttpError::ERROR_500;
         }
-        $response = new ErrorResponse($e->getMessage(), $errorCode);
-        foreach ($response->getHeaders() as $header) {
-            header($header);
-        }
+        $response = $this->container->get('nicolascajelli.server.response.ErrorResponse');
+        $response->setData($e->getMessage(), $errorCode);
+
         $this->renderResponse($response);
     }
 
@@ -84,7 +86,8 @@ abstract class RestHandler
 
     protected function _getCallMapping()
     {
-        $mapping = require_once BASE_DIR . '/build/path_mapping.php';
+        $file = $this->structure->cd('build')->file('path_mapping.php');
+        $mapping = $file->requireContent();
         if (isset($mapping['simple_paths'][$this->_request->getUri()])) {
             $map = $mapping['simple_paths'][$this->_request->getUri()];
             return $map;
@@ -115,7 +118,6 @@ abstract class RestHandler
 
     protected function buildContainer()
     {
-        $this->container = new ContainerBuilder();
         $services = $this->getServices();
         foreach ($services as $service) {
             $service->register($this->container);
@@ -127,7 +129,8 @@ abstract class RestHandler
      */
     protected function getServices()
     {
-        return require_once BASE_DIR . "/build/services_mapping.php";
+        $file = $this->structure->cd('build')->file('services_mapping.php');
+        return $file->requireContent();
     }
 
 }

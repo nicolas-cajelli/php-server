@@ -8,7 +8,9 @@
 
 namespace nicolascajelli\server\response;
 
-
+/**
+ * @NonSharedService
+ */
 class ErrorResponse extends ApiResponse
 {
     /**
@@ -16,11 +18,7 @@ class ErrorResponse extends ApiResponse
      */
     private $_message;
 
-    /**
-     * ErrorResponse constructor.
-     * @param string $getMessage
-     */
-    public function __construct($message, $status)
+    public function setData($message, $status)
     {
         $this->_message = $message;
         $this->_headers[] = 'HTTP/1.1 ' . $status;
@@ -36,5 +34,13 @@ class ErrorResponse extends ApiResponse
         return [
             'message' => $this->_message
         ];
+    }
+
+    public function render()
+    {
+        foreach ($this->getHeaders() as $header) {
+            header($header);
+        }
+        parent::render();
     }
 }

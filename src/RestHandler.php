@@ -14,6 +14,7 @@ use nicolascajelli\server\di\Service;
 use nicolascajelli\server\exception\BadRequestException;
 use nicolascajelli\server\exception\NotFoundException;
 use nicolascajelli\server\exception\RestException;
+use nicolascajelli\server\request\Request;
 use nicolascajelli\server\response\ErrorResponse;
 use nicolascajelli\server\response\Response;
 use nicolascajelli\server\filesystem\ProjectStructure;
@@ -59,7 +60,6 @@ class RestHandler
     public function dispatch()
     {
         $map = $this->_getCallMapping();
-
         if (! isset($map[$this->_request->getMethod()])) {
             throw new BadRequestException("Method is not defined for this resource.");
         }

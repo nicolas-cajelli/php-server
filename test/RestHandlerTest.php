@@ -47,11 +47,25 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
                     'controller' => '\\test\\controller\\simple',
                     'get' => [
                         'method' => 'renderSimple',
-                        'args' => []    
+                        'args' => []
+                    ]
+                ],
+                '/res/simple_args' => [
+                    'controller' => '\\test\\controller\\simple_args',
+                    'get' => [
+                        'method' => 'renderSimple',
+                        'args' => ['\\test\\request\\arg']
                     ]
                 ]
             ],
-            'dynamic_paths' => [],
+            'dynamic_paths' => [
+                '/res/dynamic/(\d+)' => [
+                    'controller' => '\\test\\controller\\dynamic',
+                    'get' => [
+                        'method' => 'renderDynamic'
+                    ]
+                ]
+            ],
         ];
         Phake::when($pathFile)->requireContent()->thenReturn($paths);
         $this->request = Phake::mock(Request::class);
@@ -121,6 +135,38 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
         };
         Phake::when($this->containerBuilder)->get('test.controller.simple')->thenReturn($controller);
         Phake::when($this->request)->getUri()->thenReturn("/res/simple");
+        Phake::when($this->request)->getMethod()->thenReturn("get");
+        $this->handler->dispatch();
+    }
+
+    public function testDispatchOnSimplePathWithArguments()
+    {
+        $arg = new class {
+            public function hello() { }
+        };
+        $controller = new class {
+            public function renderSimple($arg) {
+                $arg->hello();
+                return Phake::mock(EntityResponse::class);
+            }
+        };
+        Phake::when($this->containerBuilder)->get('test.request.arg')->thenReturn($arg);
+        Phake::when($this->containerBuilder)->get('test.controller.simple_args')->thenReturn($controller);
+        Phake::when($this->request)->getUri()->thenReturn("/res/simple_args");
+        Phake::when($this->request)->getMethod()->thenReturn("get");
+        $this->handler->dispatch();
+    }
+
+    public function testDispatchOnDynamicPath()
+    {
+        $controller = new class {
+            public function renderDynamic() {
+                return Phake::mock(EntityResponse::class);
+            }
+        };
+        Phake::when($this->containerBuilder)->get('test.controller.dynamic')->thenReturn($controller);
+
+        Phake::when($this->request)->getUri()->thenReturn("/res/dynamic/" . time());
         Phake::when($this->request)->getMethod()->thenReturn("get");
         $this->handler->dispatch();
     }

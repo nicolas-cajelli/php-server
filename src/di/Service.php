@@ -27,7 +27,7 @@ class Service
      */
     private $class;
 
-    protected $shared;
+    protected $shared = true;
 
     /**
      * Service constructor.

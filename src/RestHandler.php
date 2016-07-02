@@ -71,7 +71,8 @@ class RestHandler
             if ($arg instanceof ScalarArgument) {
                 $args[] = $arg->getValue();
             } else {
-                $args[] = new $arg($this->_request);
+                $args[] = $this->container->get(str_replace('\\', '.', trim($arg, '\\')));
+                //$args[] = new $arg($this->_request);
             }
         }
         $response = call_user_func_array(

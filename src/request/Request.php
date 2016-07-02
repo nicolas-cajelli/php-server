@@ -12,19 +12,22 @@ namespace nicolascajelli\server\request;
 class Request
 {
     protected $_host;
-    protected $_method;
     protected $_uri;
+    /**
+     * @var string
+     */
+    private $payloadProvider;
 
-    public function __construct()
+    public function __construct($payloadProvider = 'php://input')
     {
         $this->_method = strtolower($_SERVER['REQUEST_METHOD']);
-        $this->_host = $_SERVER['SERVER_NAME'];
 
         $uri = $_SERVER['REQUEST_URI'];
         if (strpos($uri, '?') !== false) {
             $uri = substr($uri, 0, strpos($uri, '?'));
         }
         $this->_uri = rtrim($uri, '/');
+        $this->payloadProvider = $payloadProvider;
     }
 
     public function getUri() : string
@@ -39,7 +42,7 @@ class Request
 
     public function getPayload()
     {
-        return json_decode(file_get_contents('php://input'), true);
+        return json_decode(file_get_contents($this->payloadProvider), true);
     }
 
     public function get($key)

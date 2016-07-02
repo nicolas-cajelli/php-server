@@ -37,7 +37,9 @@ class MappingTask implements BuildTask
             if ($reader->getParameter('Controller')) {
                 $this->generateControllerMappings($reader, $class, $paths, $dependencies);
             } elseif ($reader->getParameter('NonSharedService')) {
-                $dependencies->add(strval($class), [], false);
+                $dependencies->add(strval($class), $this->getReferences(strval($class)), false);
+            } elseif ($reader->getParameter('Inject')) {
+                $dependencies->add(strval($class), $this->getReferences(strval($class)));
             }
         }
         $this->writePathMapping($paths->simple, $paths->dynamic);
@@ -45,6 +47,17 @@ class MappingTask implements BuildTask
 
     }
 
+    protected function getReferences($class)
+    {
+        $ref = new ReflectionClass($class);
+        $methods = $ref->getMethods(ReflectionMethod::IS_PUBLIC);
+        foreach ($methods as $method) {
+            if ($method->getName() == '__construct') {
+                return $method->getParameters();
+            }
+        }
+        return [];
+    }
 
     function scan($dir) {
         $content = scandir($dir);
@@ -75,7 +88,7 @@ class MappingTask implements BuildTask
      * @param $dynamicPaths
      * @return array
      */
-    function generateControllerMappings(\DocBlockReader\Reader $reader, ClassFile $class, stdClass $paths, DependenciesMap $dependencies)
+    protected function generateControllerMappings(\DocBlockReader\Reader $reader, ClassFile $class, stdClass $paths, DependenciesMap $dependencies)
     {
         $className = strval($class);
         $basePath = $reader->getParameter('Path');

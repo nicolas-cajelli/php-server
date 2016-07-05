@@ -19,9 +19,14 @@ class MappingTask implements BuildTask
     protected $excludedDirs = ['.', '..', 'examples', 'bin', 'phpdocumentor', 'phpspec', 'test', 'tests', 'Test', 'Tests', 'composer'];
     protected $mappingsFile = 'build/path_mapping.php';
     protected $servicesFile = 'build/services_mapping.php';
+    /**
+     * @var
+     */
+    private $dir;
 
     public function __construct($dir)
     {
+        $this->dir = $dir;
         $files = $this->scan($dir);
         $paths = new stdClass();
         $paths->simple = [];
@@ -53,6 +58,11 @@ class MappingTask implements BuildTask
         $methods = $ref->getMethods(ReflectionMethod::IS_PUBLIC);
         foreach ($methods as $method) {
             if ($method->getName() == '__construct') {
+                foreach ($method->getParameters() as $param) {
+                    if ($param->getClass() == null) {
+                        return [];
+                    }
+                }
                 return $method->getParameters();
             }
         }
@@ -79,7 +89,7 @@ class MappingTask implements BuildTask
 
         $pathMapping = "<?php \n\nreturn " . var_export(['simple_paths' => $simplePaths, 'dynamic_paths' => $dynamicPaths], true) . ';';
 
-        file_put_contents($this->mappingsFile, $pathMapping);
+        file_put_contents($this->dir . '/' . $this->mappingsFile, $pathMapping);
     }
     /**
      * @param $reader
@@ -170,6 +180,6 @@ class MappingTask implements BuildTask
             $mapping .= ",\n";
         }
         $mapping .= "];\n";
-        file_put_contents($this->servicesFile, $mapping);
+        file_put_contents($this->dir . '/' . $this->servicesFile, $mapping);
     }
 }

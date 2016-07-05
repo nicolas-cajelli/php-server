@@ -8,7 +8,9 @@
 
 namespace nicolascajelli\server\request;
 
-
+/**
+ * @Inject
+ */
 class Request
 {
     protected $_host;

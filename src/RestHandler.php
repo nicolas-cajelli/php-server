@@ -39,9 +39,9 @@ class RestHandler
     {
         $this->structure = $structure;
         $this->container = $container;
+        set_exception_handler([$this, 'dispatchError']);
         $this->buildContainer();
         $this->_request = $this->container->get('nicolascajelli.server.request.Request');
-        set_exception_handler([$this, 'dispatchError']);
     }
 
     public function dispatchError(\Throwable $e)

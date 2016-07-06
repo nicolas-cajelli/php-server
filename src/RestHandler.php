@@ -42,6 +42,8 @@ class RestHandler
         set_exception_handler([$this, 'dispatchError']);
         $this->buildContainer();
         $this->_request = $this->container->get('nicolascajelli.server.request.Request');
+        $urlBuilder = $this->container->get('nicolascajelli.server.ApiUrlBuilder');
+        $urlBuilder->initRoutes($structure);
     }
 
     public function dispatchError(\Throwable $e)
@@ -89,6 +91,7 @@ class RestHandler
     {
         $file = $this->structure->cd('build')->file('path_mapping.php');
         $mapping = $file->requireContent();
+
         if (isset($mapping['simple_paths'][$this->_request->getUri()])) {
             $map = $mapping['simple_paths'][$this->_request->getUri()];
             return $map;

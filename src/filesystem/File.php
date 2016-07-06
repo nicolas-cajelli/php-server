@@ -24,6 +24,6 @@ class File
 
     public function requireContent()
     {
-        return require_once $this->path;
+        return require $this->path;
     }
 }

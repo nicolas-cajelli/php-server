@@ -51,4 +51,14 @@ class Request
     {
         return isset($_GET[$key]) ? $_GET[$key] : null;
     }
+
+    public function getProtocol()
+    {
+        return 'http';
+    }
+
+    public function getHost()
+    {
+        return $_SERVER['SERVER_NAME'];
+    }
 }

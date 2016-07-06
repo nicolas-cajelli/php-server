@@ -117,6 +117,7 @@ class MappingTask implements BuildTask
             $methodReader = new \DocBlockReader\Reader($className, $method->getName());
 
             $methodType = strtolower($methodReader->getParameter('Method'));
+            $routeName = $methodReader->getParameter('Name');
             $path = $basePath;
             if (!$methodReader->getParameter('DynamicPath')) {
                 $path .= $methodReader->getParameter('Path');
@@ -133,6 +134,7 @@ class MappingTask implements BuildTask
                 }
                 $paths->simple[$path][$methodType] = [
                     'method' => $method->getName(),
+                    'name' => $routeName,
                     'args' => $args,
                     'return' => $returnType
                 ];
@@ -145,6 +147,7 @@ class MappingTask implements BuildTask
                 }
                 $paths->dynamic[$path][$methodType] = [
                     'method' => $method->getName(),
+                    'name' => $routeName,
                     'return' => $returnType
                 ];
             }

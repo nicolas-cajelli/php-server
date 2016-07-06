@@ -41,8 +41,8 @@ class RestHandler
         $this->container = $container;
         set_exception_handler([$this, 'dispatchError']);
         $this->buildContainer();
-        $this->_request = $this->container->get('nicolascajelli.server.request.Request');
-        $urlBuilder = $this->container->get('nicolascajelli.server.ApiUrlBuilder');
+        $this->_request = $this->container->get(Request::class);
+        $urlBuilder = $this->container->get(ApiUrlBuilder::class);
         $urlBuilder->initRoutes($structure);
     }
 
@@ -53,7 +53,7 @@ class RestHandler
         } else {
             $errorCode = HttpError::ERROR_500;
         }
-        $response = $this->container->get('nicolascajelli.server.response.ErrorResponse');
+        $response = $this->container->get(ErrorResponse::class);
         $response->setData($e->getMessage(), $errorCode);
 
         $this->renderResponse($response);
@@ -66,15 +66,14 @@ class RestHandler
             throw new BadRequestException("Method is not defined for this resource.");
         }
         $controllerClass = $map['controller'];
-        $controller = $this->container->get(str_replace('\\', '.', trim($controllerClass, '\\')));
+        $controller = $this->container->get($controllerClass);
         $args = [];
 
         foreach ($map[$this->_request->getMethod()]['args'] as $arg) {
             if ($arg instanceof ScalarArgument) {
                 $args[] = $arg->getValue();
             } else {
-                $args[] = $this->container->get(str_replace('\\', '.', trim($arg, '\\')));
-                //$args[] = new $arg($this->_request);
+                $args[] = $this->container->get($arg);
             }
         }
         $response = call_user_func_array(

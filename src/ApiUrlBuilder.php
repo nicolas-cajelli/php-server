@@ -36,6 +36,9 @@ class ApiUrlBuilder
         $types = ['get', 'post', 'put'];
         foreach ($mapping['simple_paths'] as $path => $config) {
             foreach ($types as $type) {
+                if (! isset($config[$type])) {
+                    continue;
+                }
                 foreach ($config[$type] as $key => $routeName) {
                     if ($key == 'name' && ! empty($routeName)) {
                         $this->definitions[$routeName] = new RouteDefinition($path);
@@ -45,6 +48,9 @@ class ApiUrlBuilder
         }
         foreach ($mapping['dynamic_paths'] as $path => $config) {
             foreach ($types as $type) {
+                if (! isset($config[$type])) {
+                    continue;
+                }
                 foreach ($config[$type] as $key => $routeName) {
                     if ($key == 'name' && ! empty($routeName)) {
                         $this->definitions[$routeName] = new DynamicRouteDefinition($path);

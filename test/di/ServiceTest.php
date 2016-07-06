@@ -2,7 +2,6 @@
 namespace nicolascajelli\server\di;
 use Phake;
 use PHPUnit_Framework_TestCase;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 
 /**

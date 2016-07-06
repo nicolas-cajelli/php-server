@@ -9,6 +9,7 @@
 namespace nicolascajelli\server;
 
 use nicolascajelli\server\datatype\HttpError;
+use nicolascajelli\server\di\ContainerBuilder;
 use nicolascajelli\server\di\Service;
 use nicolascajelli\server\filesystem\Directory;
 use nicolascajelli\server\filesystem\File;
@@ -18,7 +19,6 @@ use nicolascajelli\server\response\EntityResponse;
 use \nicolascajelli\server\exception\BadRequestException;
 use \nicolascajelli\server\request\Request;
 use \Phake;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class RestHandlerTest extends \PHPUnit_Framework_TestCase
 {
@@ -69,9 +69,9 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
         ];
         Phake::when($pathFile)->requireContent()->thenReturn($paths);
         $this->request = Phake::mock(Request::class);
-        Phake::when($this->containerBuilder)->get('nicolascajelli.server.request.Request')->thenReturn($this->request);
+        Phake::when($this->containerBuilder)->get(Request::class)->thenReturn($this->request);
 
-        Phake::when($this->containerBuilder)->get('nicolascajelli.server.ApiUrlBuilder')->thenReturn(
+        Phake::when($this->containerBuilder)->get(ApiUrlBuilder::class)->thenReturn(
             Phake::mock(ApiUrlBuilder::class)
         );
 
@@ -79,7 +79,7 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testServerSetup() {
-        Phake::verify($this->containerBuilder)->get('nicolascajelli.server.request.Request');
+        Phake::verify($this->containerBuilder)->get(Request::class);
         Phake::verify($this->service)->register($this->containerBuilder);
 
         $exceptionHandler = set_exception_handler(null);
@@ -89,7 +89,7 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
 
     public function testDispatchErrorForUnknownException() {
         $response = Phake::mock(ErrorResponse::class);
-        Phake::when($this->containerBuilder)->get('nicolascajelli.server.response.ErrorResponse')->thenReturn($response);
+        Phake::when($this->containerBuilder)->get(ErrorResponse::class)->thenReturn($response);
         $this->handler->dispatchError(new \Exception("Test"));
 
         Phake::verify($response)->setData("Test", HttpError::ERROR_500);
@@ -101,7 +101,7 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
      */
     public function testDispatchErrorForKnownException() {
         $response = Phake::mock(ErrorResponse::class);
-        Phake::when($this->containerBuilder)->get('nicolascajelli.server.response.ErrorResponse')->thenReturn($response);
+        Phake::when($this->containerBuilder)->get(ErrorResponse::class)->thenReturn($response);
         $this->handler->disPatchError(new BadRequestException("Invalid request"));
         Phake::verify($response)->setData("Invalid request", HttpError::ERROR_400);
         Phake::verify($response)->render();
@@ -137,7 +137,7 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
                 return Phake::mock(EntityResponse::class);
             }
         };
-        Phake::when($this->containerBuilder)->get('test.controller.simple')->thenReturn($controller);
+        Phake::when($this->containerBuilder)->get('\\test\\controller\\simple')->thenReturn($controller);
         Phake::when($this->request)->getUri()->thenReturn("/res/simple");
         Phake::when($this->request)->getMethod()->thenReturn("get");
         $this->handler->dispatch();
@@ -154,8 +154,8 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
                 return Phake::mock(EntityResponse::class);
             }
         };
-        Phake::when($this->containerBuilder)->get('test.request.arg')->thenReturn($arg);
-        Phake::when($this->containerBuilder)->get('test.controller.simple_args')->thenReturn($controller);
+        Phake::when($this->containerBuilder)->get('\\test\\request\\arg')->thenReturn($arg);
+        Phake::when($this->containerBuilder)->get('\\test\\controller\\simple_args')->thenReturn($controller);
         Phake::when($this->request)->getUri()->thenReturn("/res/simple_args");
         Phake::when($this->request)->getMethod()->thenReturn("get");
         $this->handler->dispatch();
@@ -168,7 +168,7 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
                 return Phake::mock(EntityResponse::class);
             }
         };
-        Phake::when($this->containerBuilder)->get('test.controller.dynamic')->thenReturn($controller);
+        Phake::when($this->containerBuilder)->get('\\test\\controller\\dynamic')->thenReturn($controller);
 
         Phake::when($this->request)->getUri()->thenReturn("/res/dynamic/" . time());
         Phake::when($this->request)->getMethod()->thenReturn("get");

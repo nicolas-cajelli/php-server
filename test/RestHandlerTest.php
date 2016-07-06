@@ -71,6 +71,10 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
         $this->request = Phake::mock(Request::class);
         Phake::when($this->containerBuilder)->get('nicolascajelli.server.request.Request')->thenReturn($this->request);
 
+        Phake::when($this->containerBuilder)->get('nicolascajelli.server.ApiUrlBuilder')->thenReturn(
+            Phake::mock(ApiUrlBuilder::class)
+        );
+
         $this->handler = new RestHandler($this->containerBuilder, $projectStructure);
     }
 

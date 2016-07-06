@@ -12,4 +12,6 @@ namespace nicolascajelli\server\request;
 interface ServiceRequest
 {
     public function getQueryArguments() : array;
+
+    public function getPathArguments() : array;
 }

@@ -12,6 +12,7 @@ namespace nicolascajelli\server;
 use nicolascajelli\server\filesystem\ProjectStructure;
 use nicolascajelli\server\request\Request;
 use nicolascajelli\server\request\RouteDefinition;
+use nicolascajelli\server\request\DynamicRouteDefinition;
 use nicolascajelli\server\request\ServiceRequest;
 /**
  * @Inject
@@ -46,7 +47,7 @@ class ApiUrlBuilder
             foreach ($types as $type) {
                 foreach ($config[$type] as $key => $routeName) {
                     if ($key == 'name' && ! empty($routeName)) {
-                        $this->definitions[$routeName] = new RouteDefinition($path);
+                        $this->definitions[$routeName] = new DynamicRouteDefinition($path);
                     }
                 }
             }

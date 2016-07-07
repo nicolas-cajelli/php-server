@@ -45,6 +45,12 @@ class MappingTask implements BuildTask
                 $dependencies->add(strval($class), $this->getReferences(strval($class)), false);
             } elseif ($reader->getParameter('Inject')) {
                 $dependencies->add(strval($class), $this->getReferences(strval($class)));
+            } elseif ($reader->getParameter('Implements')) {
+                $ref = new ReflectionClass(strval($class));
+                $interfaces = $ref->getInterfaces();
+                foreach ($interfaces as $interface) {
+                    $dependencies->add(strval($interface), $this->getReferences(strval($class)), true, strval($class));
+                }
             }
         }
         $this->writePathMapping($paths->simple, $paths->dynamic);
@@ -160,9 +166,8 @@ class MappingTask implements BuildTask
     function writeServicesMapping(DependenciesMap $map) {
         $mapping = "<?php\nuse " . Service::class . ";\n";
         $mapping .= "return [\n";
-        foreach ($map->getServices() as $service => $config) {
-            $serviceName = trim(str_replace('\\', '.', $service), '.');
-            $mapping.= "\tService::create('$serviceName', \\$service::class)";
+        foreach ($map->getServices() as $serviceName => $config) {
+            $mapping.= "\tService::create('$serviceName', \\" . $config['className'] . "::class)";
             if (! $config['shared']) {
                 $mapping .= "\n\t\t->setShared(false)";
             }

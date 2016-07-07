@@ -14,4 +14,5 @@ class HttpError
     const ERROR_400 = '400 Bad Request';
     const ERROR_500 = '500 Internal Server Error';
     const ERROR_404 = '404 Not Found';
+    const ERROR_401 = '401 Unauthorized';
 }

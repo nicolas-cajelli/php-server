@@ -17,8 +17,11 @@ class DependenciesMap
     /**
      * @param $parameters ReflectionParameter[]
      */
-    public function add($className, $parameters, $shared = true)
+    public function add($className, $parameters, $shared = true, $id = null)
     {
+        if ($id === null) {
+            $id = trim(str_replace('\\', '.', $className), '.');
+        }
         $dependencies = [];
         foreach ($parameters as $param) {
             $service = strval($param->getType());
@@ -29,7 +32,8 @@ class DependenciesMap
             }
             $dependencies[] = $service;
         }
-        $this->services[$className] = [
+        $this->services[$id] = [
+            'className' => $className,
             'shared' => $shared,
             'dependencies' => $dependencies
         ];

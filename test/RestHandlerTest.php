@@ -18,6 +18,7 @@ use nicolascajelli\server\response\ErrorResponse;
 use nicolascajelli\server\response\EntityResponse;
 use \nicolascajelli\server\exception\BadRequestException;
 use \nicolascajelli\server\request\Request;
+use nicolascajelli\server\restriction\RestrictionHandler;
 use \Phake;
 
 class RestHandlerTest extends \PHPUnit_Framework_TestCase
@@ -47,6 +48,11 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
                     'controller' => '\\test\\controller\\simple',
                     'get' => [
                         'method' => 'renderSimple',
+                        'args' => []
+                    ],
+                    'post' => [
+                        'method' => 'postSimple',
+                        'restricted' => true,
                         'args' => []
                     ]
                 ],
@@ -172,6 +178,30 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
 
         Phake::when($this->request)->getUri()->thenReturn("/res/dynamic/" . time());
         Phake::when($this->request)->getMethod()->thenReturn("get");
+        $this->handler->dispatch();
+    }
+
+    /**
+     * @expectedException \nicolascajelli\server\exception\UnauthorizedException
+     */
+    public function testDispatchOnRestricted()
+    {
+        $controller = new class {
+            public function postSimple() {
+                return Phake::mock(EntityResponse::class);
+            }
+        };
+        $restriction = new class implements RestrictionHandler {
+
+            public function isAllowed() : bool
+            {
+                return false;
+            }
+        };
+        Phake::when($this->containerBuilder)->get(RestrictionHandler::class)->thenReturn($restriction);
+        Phake::when($this->containerBuilder)->get('\\test\\controller\\simple')->thenReturn($controller);
+        Phake::when($this->request)->getUri()->thenReturn("/res/simple");
+        Phake::when($this->request)->getMethod()->thenReturn("post");
         $this->handler->dispatch();
     }
 }

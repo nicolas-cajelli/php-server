@@ -14,10 +14,12 @@ use nicolascajelli\server\di\Service;
 use nicolascajelli\server\exception\BadRequestException;
 use nicolascajelli\server\exception\NotFoundException;
 use nicolascajelli\server\exception\RestException;
+use nicolascajelli\server\exception\UnauthorizedException;
 use nicolascajelli\server\request\Request;
 use nicolascajelli\server\response\ErrorResponse;
 use nicolascajelli\server\response\Response;
 use nicolascajelli\server\filesystem\ProjectStructure;
+use nicolascajelli\server\restriction\RestrictionHandler;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class RestHandler
@@ -68,6 +70,14 @@ class RestHandler
         $controllerClass = $map['controller'];
         $controller = $this->container->get($controllerClass);
         $args = [];
+
+        if ($map[$this->_request->getMethod()]['restricted']) {
+            /** @var RestrictionHandler $restrictionHandler */
+            $restrictionHandler = $this->container->get(RestrictionHandler::class);
+            if (! $restrictionHandler->isAllowed()) {
+                throw new UnauthorizedException('You must be logged in to use this resource.');
+            }
+        }
 
         foreach ($map[$this->_request->getMethod()]['args'] as $arg) {
             if ($arg instanceof ScalarArgument) {

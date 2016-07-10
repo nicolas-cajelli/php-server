@@ -16,7 +16,7 @@ use stdClass;
 
 class MappingTask implements BuildTask
 {
-    protected $excludedDirs = ['.', '..', 'examples', 'bin', 'phpdocumentor', 'phpspec', 'test', 'tests', 'Test', 'Tests', 'composer'];
+    protected $excludedDirs = ['.', '..', 'examples', 'build', 'bin', 'phpdocumentor', 'phpspec', 'test', 'tests', 'Test', 'Tests', 'composer'];
     protected $mappingsFile = 'build/path_mapping.php';
     protected $servicesFile = 'build/services_mapping.php';
     /**
@@ -49,7 +49,7 @@ class MappingTask implements BuildTask
                 $ref = new ReflectionClass(strval($class));
                 $interfaces = $ref->getInterfaces();
                 foreach ($interfaces as $interface) {
-                    $dependencies->add(strval($interface), $this->getReferences(strval($class)), true, strval($class));
+                    $dependencies->add(strval($interface->getName()), $this->getReferences(strval($class)), true, strval($class));
                 }
             }
         }
@@ -80,7 +80,7 @@ class MappingTask implements BuildTask
         $files = [];
         foreach ($content as $child) {
             if (is_dir($dir . '/' . $child)) {
-                if (! in_array($child, $this->excludedDirs)) {
+                if (! in_array(str_replace($this->dir . '/', '', $child), $this->excludedDirs)) {
                     $files = array_merge($files, $this->scan($dir . '/' . $child));
                 }
             } else {

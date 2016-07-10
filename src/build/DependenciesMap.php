@@ -20,13 +20,16 @@ class DependenciesMap
     public function add($className, $parameters, $shared = true, $id = null)
     {
         if ($id === null) {
-            $id = trim(str_replace('\\', '.', $className), '.');
+            $id = $className;
         }
+        $id = trim(str_replace('\\', '.', $id), '.');
         $dependencies = [];
         foreach ($parameters as $param) {
             $service = strval($param->getType());
+            $service = trim(str_replace('\\', '.', $service), '.');
             if (! isset($this->services[$service])) {
                 $this->services[$service] = [
+                    'className' => $service,
                     'shared' => true
                 ];
             }

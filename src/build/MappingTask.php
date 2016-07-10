@@ -49,7 +49,7 @@ class MappingTask implements BuildTask
                 $ref = new ReflectionClass(strval($class));
                 $interfaces = $ref->getInterfaces();
                 foreach ($interfaces as $interface) {
-                    $dependencies->add(strval($interface->getName()), $this->getReferences(strval($class)), true, strval($class));
+                    $dependencies->add(strval($class), $this->getReferences(strval($class)), true, strval($interface->getName()));
                 }
             }
         }
@@ -123,6 +123,7 @@ class MappingTask implements BuildTask
             $methodReader = new \DocBlockReader\Reader($className, $method->getName());
 
             $methodType = strtolower($methodReader->getParameter('Method'));
+            $restricted = strtolower($methodReader->getParameter('Restricted'));
             $routeName = $methodReader->getParameter('Name');
             $path = $basePath;
             if (!$methodReader->getParameter('DynamicPath')) {
@@ -140,6 +141,7 @@ class MappingTask implements BuildTask
                 }
                 $paths->simple[$path][$methodType] = [
                     'method' => $method->getName(),
+                    'restricted' => $restricted,
                     'name' => $routeName,
                     'args' => $args,
                     'return' => $returnType
@@ -154,6 +156,7 @@ class MappingTask implements BuildTask
                 $paths->dynamic[$path][$methodType] = [
                     'method' => $method->getName(),
                     'name' => $routeName,
+                    'restricted' => $restricted,
                     'return' => $returnType
                 ];
             }

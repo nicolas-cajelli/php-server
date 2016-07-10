@@ -25,11 +25,11 @@ class DependenciesMap
         $id = trim(str_replace('\\', '.', $id), '.');
         $dependencies = [];
         foreach ($parameters as $param) {
-            $service = strval($param->getType());
-            $service = trim(str_replace('\\', '.', $service), '.');
+            $serviceClass = strval($param->getType());
+            $service = trim(str_replace('\\', '.', $serviceClass), '.');
             if (! isset($this->services[$service])) {
                 $this->services[$service] = [
-                    'className' => $service,
+                    'className' => $serviceClass,
                     'shared' => true
                 ];
             }

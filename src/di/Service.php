@@ -35,7 +35,7 @@ class Service
      */
     public function __construct(string $id, string $class)
     {
-        $this->id = $id;
+        $this->id = strtolower($id);
         $this->class = $class;
     }
 

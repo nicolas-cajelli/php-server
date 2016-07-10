@@ -48,6 +48,7 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
                     'controller' => '\\test\\controller\\simple',
                     'get' => [
                         'method' => 'renderSimple',
+                        'restricted' => false,
                         'args' => []
                     ],
                     'post' => [
@@ -60,6 +61,7 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
                     'controller' => '\\test\\controller\\simple_args',
                     'get' => [
                         'method' => 'renderSimple',
+                        'restricted' => false,
                         'args' => ['\\test\\request\\arg']
                     ]
                 ]
@@ -68,6 +70,7 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
                 '/res/dynamic/(\d+)' => [
                     'controller' => '\\test\\controller\\dynamic',
                     'get' => [
+                        'restricted' => false,
                         'method' => 'renderDynamic'
                     ]
                 ]
@@ -132,7 +135,7 @@ class RestHandlerTest extends \PHPUnit_Framework_TestCase
     public function testDispatchOnSimplePathInvalidMethod()
     {
         Phake::when($this->request)->getUri()->thenReturn("/res/simple");
-        Phake::when($this->request)->getMethod()->thenReturn("post");
+        Phake::when($this->request)->getMethod()->thenReturn("put");
         $this->handler->dispatch();
     }
 
